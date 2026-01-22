@@ -169,11 +169,11 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-800 to-orange-800 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-amber-800 to-orange-800 bg-clip-text text-transparent mb-2">
               {step === 'form' ? 'Create Account' : 'Verify Email'}
             </h1>
             <p className="text-gray-600 text-lg">
@@ -258,7 +258,7 @@ export default function SignUpPage() {
               <button
                 onClick={handleSignUp}
                 disabled={loading || !email.trim() || !password}
-                className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white py-4 px-6 rounded-xl text-lg font-semibold hover:from-amber-700 hover:to-orange-700 focus:outline-none focus:ring-4 focus:ring-amber-300/50 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+                className="w-full bg-linear-to-r from-amber-600 to-orange-600 text-white py-4 px-6 rounded-xl text-lg font-semibold hover:from-amber-700 hover:to-orange-700 focus:outline-none focus:ring-4 focus:ring-amber-300/50 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
                 {loading && <Loader2 className="h-5 w-5 animate-spin" />}
                 Create Account
               </button>
@@ -290,7 +290,7 @@ export default function SignUpPage() {
               <button
                 onClick={handleVerify}
                 disabled={loading || code.length !== 6}
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl text-lg font-semibold hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-300/50 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+                className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl text-lg font-semibold hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-300/50 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
                 {loading && <Loader2 className="h-5 w-5 animate-spin" />}
                 Verify Email
               </button>

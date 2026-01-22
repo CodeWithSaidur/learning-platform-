@@ -187,11 +187,11 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-800 to-orange-800 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-amber-800 to-orange-800 bg-clip-text text-transparent mb-2">
               {step === 'request' ? 'Reset Password' : 'New Password'}
             </h1>
             <p className="text-gray-600 text-lg">
@@ -236,7 +236,7 @@ export default function ForgotPasswordPage() {
               <button
                 onClick={handleSendCode}
                 disabled={loading || !email.trim()}
-                className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white py-4 rounded-xl font-semibold">
+                className="w-full bg-linear-to-r from-amber-600 to-orange-600 text-white py-4 rounded-xl font-semibold">
                 {loading ? 'Sending...' : 'Send Reset Code'}
               </button>
             </>
@@ -276,7 +276,7 @@ export default function ForgotPasswordPage() {
                 disabled={
                   loading || code.length !== 6 || newPassword.length < 8
                 }
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-xl font-semibold">
+                className="w-full bg-linear-to-r from-green-600 to-emerald-600 text-white py-4 rounded-xl font-semibold">
                 {loading ? 'Resetting...' : 'Reset Password'}
               </button>
 

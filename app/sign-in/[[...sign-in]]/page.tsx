@@ -18,7 +18,7 @@ export default function SignInPage() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-50 to-orange-100">
         <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
       </div>
     )
@@ -100,11 +100,11 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-amber-50 to-orange-100 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-800 to-orange-800 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-amber-800 to-orange-800 bg-clip-text text-transparent mb-2">
               Welcome Back
             </h1>
             <p className="text-gray-600 text-lg">Sign in to your account</p>
@@ -170,7 +170,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading || !email.trim() || !password}
-              className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white py-4 rounded-xl text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full bg-linear-to-r from-amber-600 to-orange-600 text-white py-4 rounded-xl text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading && <Loader2 className="h-5 w-5 animate-spin" />}
               {loading ? 'Signing In...' : 'Sign In'}

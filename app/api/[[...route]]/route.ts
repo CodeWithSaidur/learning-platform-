@@ -14,7 +14,15 @@ type Variables = {
   role?: string
 }
 
-const app = new Hono<{ Variables: Variables }>().basePath('/api')
+const app = new Hono<{ Variables: Variables }>({ strict: false }).basePath('/api')
+
+// Optional: Add a logger to see incoming requests in prod logs
+app.use('*', async (c, next) => {
+  const start = Date.now()
+  await next()
+  const ms = Date.now() - start
+  console.log(`[API ${c.req.method}] ${c.req.path} - ${c.res.status} (${ms}ms)`)
+})
 
 app.onError((err, c) => {
   console.error(err)
@@ -23,8 +31,12 @@ app.onError((err, c) => {
 
 // Middleware
 app.use('/*', async (c, next) => {
-  const publicRoutes = ['/api/communities/all']
-  if (publicRoutes.includes(c.req.path)) {
+  // Check if the current route is public
+  // Note: in Hono with basePath('/api'), c.req.path starts AFTER /api
+  const internalPath = c.req.path // e.g., "/communities/all"
+  const publicPaths = ['/communities/all', '/admin/login']
+
+  if (publicPaths.includes(internalPath)) {
     return next()
   }
 
@@ -65,7 +77,7 @@ app.use('/*', async (c, next) => {
     console.log(`[API Middleware] Granted internal 'admin' role based on email: ${user.email}`)
   }
 
-  console.log(`[API Middleware] Processing ${c.req.method} ${c.req.path} for Clerk user ${userId} | Email: ${user?.email} | Role: ${role}`)
+  console.log(`[API Middleware] OK: ${c.req.method} ${c.req.path} | DB User: ${user.id} | Email: ${user.email} | Role: ${role}`)
   c.set('userId', user.id)
   c.set('role', role)
   return await next()
@@ -76,6 +88,12 @@ const routes = app
   .route('/dashboard', dashboardApp)
   .route('/chat', chatApp)
   .route('/admin', adminApp)
+
+// Catch-all for 404s within Hono
+app.notFound((c) => {
+  console.error(`[API 404] NOT FOUND: ${c.req.method} ${c.req.url}`)
+  return c.json({ error: 'Not Found', path: c.req.path }, 404)
+})
 
 export type AppType = typeof routes
 

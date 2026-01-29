@@ -29,13 +29,21 @@ import { motion, AnimatePresence } from 'motion/react'
 import { Textarea } from '@/components/ui/textarea'
 import { useRouter } from 'next/navigation'
 
+import { useUser } from '@clerk/nextjs'
+
 export default function CommunitiesPage() {
+    const { user, isLoaded: userLoaded } = useUser()
     const [search, setSearch] = useState('')
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const [newName, setNewName] = useState('')
     const [newDescription, setNewDescription] = useState('')
+    const [newImageUrl, setNewImageUrl] = useState('')
     const queryClient = useQueryClient()
     const router = useRouter()
+
+    const role = (user?.publicMetadata as any)?.role?.toLowerCase() || (user?.unsafeMetadata as any)?.role?.toLowerCase()
+    const email = user?.primaryEmailAddress?.emailAddress?.toLowerCase()
+    const isAdmin = role === 'admin' || email === 'sabedbarbhuiya3@gmail.com'
 
     const { data: communities, isLoading } = useQuery<Community[]>({
         queryKey: ['all-communities'],
@@ -51,10 +59,14 @@ export default function CommunitiesPage() {
             const res = await (client.api.communities.$post as any)({
                 json: {
                     name: newName,
-                    description: newDescription
+                    description: newDescription,
+                    imageUrl: newImageUrl
                 }
             })
-            if (!res.ok) throw new Error('Failed to create community')
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}))
+                throw new Error(errorData.error || 'Failed to create community')
+            }
             return res.json() as unknown as Promise<Community>
         },
         onSuccess: (newCom) => {
@@ -62,6 +74,7 @@ export default function CommunitiesPage() {
             setIsCreateModalOpen(false)
             setNewName('')
             setNewDescription('')
+            setNewImageUrl('')
             router.push(`/communities/${newCom.id}`)
         }
     })
@@ -82,14 +95,16 @@ export default function CommunitiesPage() {
                         Connect with like-minded learners around the globe.
                     </p>
                 </div>
-                <Button
-                    size="lg"
-                    className="rounded-full px-6 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-0.5"
-                    onClick={() => setIsCreateModalOpen(true)}
-                >
-                    <Plus className="size-5 mr-2" />
-                    Create Community
-                </Button>
+                {isAdmin && (
+                    <Button
+                        size="lg"
+                        className="rounded-full px-6 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-0.5"
+                        onClick={() => setIsCreateModalOpen(true)}
+                    >
+                        <Plus className="size-5 mr-2" />
+                        Create Community
+                    </Button>
+                )}
             </div>
 
             {/* Search */}
@@ -199,6 +214,15 @@ export default function CommunitiesPage() {
                                             className="min-h-[120px] rounded-xl bg-muted/20 border-none focus-visible:ring-primary resize-none"
                                             value={newDescription}
                                             onChange={e => setNewDescription(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium px-1">Community Image URL (Optional)</label>
+                                        <Input
+                                            placeholder="https://example.com/image.png"
+                                            className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary"
+                                            value={newImageUrl}
+                                            onChange={e => setNewImageUrl(e.target.value)}
                                         />
                                     </div>
 

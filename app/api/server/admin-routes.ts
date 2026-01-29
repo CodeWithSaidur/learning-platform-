@@ -10,8 +10,20 @@ type Variables = {
 }
 
 const adminApp = new Hono<{ Variables: Variables }>()
+    // Public login endpoint for admin portal
+    .post('/login', async c => {
+        const { email, password } = await c.req.json<{ email: string, password?: string }>()
 
-    // Middleware to protect all admin routes
+        // For now, we validate against the hardcoded admin email
+        // and check if it matches the designated administrator
+        if (email?.toLowerCase() === 'sabedbarbhuiya3@gmail.com') {
+            return c.json({ ok: true })
+        }
+
+        return c.json({ ok: false, message: 'Invalid credentials' }, 401)
+    })
+
+    // Middleware to protect all other admin routes
     .use('/*', async (c, next) => {
         const userId = c.get('userId')
         const clerkRole = c.get('role')

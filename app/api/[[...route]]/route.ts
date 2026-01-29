@@ -60,7 +60,7 @@ app.use('/*', async (c, next) => {
     null
 
   // Fallback: If the email is the designated admin email, grant admin role
-  if (!role && user?.email?.toLowerCase() === 'sabedbarbhuiya3@gmail.com') {
+  if (user?.email?.toLowerCase() === 'sabedbarbhuiya3@gmail.com') {
     role = 'admin'
     console.log(`[API Middleware] Granted internal 'admin' role based on email: ${user.email}`)
   }

@@ -3,6 +3,7 @@ import { conversations, matches, messages, users, conversationSummaries } from '
 import { and, desc, eq, or, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { generateConversationSummary } from '@/lib/ai/summary-service'
+import { pusherServer } from '@/lib/pusher'
 
 type Variables = {
     userId: string
@@ -107,6 +108,13 @@ const chatApp = new Hono<{ Variables: Variables }>()
         await db.update(conversations)
             .set({ lastMessageAt: new Date() })
             .where(eq(conversations.id, conversation.id))
+
+        // Trigger Pusher event
+        try {
+            await pusherServer.trigger(`chat-${conversation.id}`, 'new-message', newMessage)
+        } catch (e) {
+            console.error('Pusher trigger failed:', e)
+        }
 
         return c.json(newMessage)
     })

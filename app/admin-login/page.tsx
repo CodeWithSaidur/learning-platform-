@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { client } from '@/lib/api-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +16,18 @@ export default function AdminLoginPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const router = useRouter()
+    const { user, isLoaded: userLoaded } = useUser()
+
+    // Auto-redirect if already admin
+    useEffect(() => {
+        if (userLoaded && user) {
+            const role = (user?.publicMetadata as any)?.role?.toLowerCase()
+            const email = user?.primaryEmailAddress?.emailAddress?.toLowerCase()
+            if (role === 'admin' || email === 'sabedbarbhuiya3@gmail.com') {
+                router.push('/admin')
+            }
+        }
+    }, [user, userLoaded, router])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -22,14 +35,20 @@ export default function AdminLoginPage() {
         setError('')
 
         try {
-            const res = await (client.api.admin.login as any).$post({
+            // @ts-ignore - types might not be updated yet
+            const res = await client.api.admin.login.$post({
                 json: { email, password }
             })
 
             if (res.ok) {
-                localStorage.setItem('admin_auth', 'true')
-                localStorage.setItem('admin_key', password) // Store the governing password as the auth key
-                router.push('/admin')
+                const data = await res.json()
+                if (data.ok) {
+                    localStorage.setItem('admin_auth', 'true')
+                    localStorage.setItem('admin_key', password)
+                    router.push('/admin')
+                } else {
+                    setError('Access denied. This portal is restricted to system administrators.')
+                }
             } else {
                 setError('Invalid administrator credentials.')
             }

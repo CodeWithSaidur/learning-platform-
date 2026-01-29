@@ -5,13 +5,13 @@ import Link from 'next/link'
 import {
   SignedIn,
   SignedOut,
-  UserButton,
   useUser
 } from '@clerk/nextjs'
 import { Trophy } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import UserProfileDropdown from './user-profile-dropdown'
 
 type HeaderProps = {
   isPro: boolean
@@ -71,13 +71,7 @@ export default function Header({ isPro }: HeaderProps) {
               <Badge variant="secondary">Free</Badge>
             )}
 
-            <UserButton
-              appearance={{
-                elements: {
-                  avatarBox: 'h-9 w-9 rounded-full'
-                }
-              }}
-            />
+            <UserProfileDropdown />
           </SignedIn>
 
           <SignedOut>

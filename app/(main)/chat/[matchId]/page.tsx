@@ -11,6 +11,7 @@ import { useUser } from '@clerk/nextjs'
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { useRouter } from 'next/navigation'
+import { pusherClient } from '@/lib/pusher-client'
 
 interface Message {
     id: string
@@ -72,7 +73,7 @@ export default function ChatWindowPage() {
         }
     })
 
-    // Poll for messages
+    // Initial fetch of messages
     const { data, isLoading: messagesLoading } = useQuery<ChatData>({
         queryKey: ['chat', matchId],
         queryFn: async () => {
@@ -81,9 +82,38 @@ export default function ChatWindowPage() {
             })
             if (!res.ok) throw new Error('Failed to load chat')
             return res.json() as unknown as Promise<ChatData>
-        },
-        refetchInterval: 2000 // Poll every 2 seconds for a more "real-time" feel
+        }
     })
+
+    // Manage messages locally to allow real-time updates without full refetch
+    const [messages, setMessages] = useState<Message[]>([])
+
+    useEffect(() => {
+        if (data?.messages) {
+            setMessages(data.messages)
+        }
+    }, [data?.messages])
+
+    // Subscribe to Pusher channel for real-time updates
+    useEffect(() => {
+        if (!data?.conversation.id) return
+
+        const channelName = `chat-${data.conversation.id}`
+        const channel = pusherClient.subscribe(channelName)
+
+        channel.bind('new-message', (newMessage: Message) => {
+            setMessages(prev => {
+                // Prevent duplicate messages if the sender also gets the event
+                if (prev.some(m => m.id === newMessage.id)) return prev
+                return [...prev, newMessage]
+            })
+        })
+
+        return () => {
+            pusherClient.unsubscribe(channelName)
+            channel.unbind_all()
+        }
+    }, [data?.conversation.id])
 
     const isLoading = messagesLoading || !me
 
@@ -120,7 +150,7 @@ export default function ChatWindowPage() {
     // Scroll to bottom on new messages
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, [data?.messages])
+    }, [messages])
 
     return (
         <div className="flex flex-row h-full w-full overflow-hidden">
@@ -156,7 +186,7 @@ export default function ChatWindowPage() {
                             <p className="text-sm">Loading history...</p>
                         </div>
                     )}
-                    {data?.messages.length === 0 && !isLoading && (
+                    {messages.length === 0 && !isLoading && (
                         <div className="flex flex-col items-center justify-center h-full space-y-4 opacity-40">
                             <MessageCircle className="size-12" />
                             <div className="text-center">
@@ -165,7 +195,7 @@ export default function ChatWindowPage() {
                             </div>
                         </div>
                     )}
-                    {data?.messages.map(msg => {
+                    {messages.map(msg => {
                         const isMe = msg.senderId === me?.id
                         return (
                             <div key={msg.id} className={cn(

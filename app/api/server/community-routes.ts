@@ -6,6 +6,7 @@ import { findMatches } from '@/lib/ai/matching-service'
 
 type Variables = {
   userId: string
+  role?: string
 }
 
 // Main communities app
@@ -16,6 +17,13 @@ const communitiesApp = new Hono<{ Variables: Variables }>()
   })
   .post('/', async c => {
     const userId = c.get('userId')
+    const role = c.get('role')
+    console.log(`[POST /api/communities] User: ${userId} | Role: ${role}`)
+
+    if (role !== 'admin') {
+      return c.json({ error: 'Only administrators can create communities' }, 403)
+    }
+
     const { name, description, imageUrl } = await c.req.json<{ name: string, description?: string, imageUrl?: string }>()
 
     if (!name) return c.json({ error: 'Name is required' }, 400)

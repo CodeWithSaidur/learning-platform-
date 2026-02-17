@@ -1,5 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 import {
   Card,
   CardContent,
@@ -9,9 +10,11 @@ import {
 } from '@/components/ui/card'
 import { client } from '@/lib/api-client'
 import { useUser } from '@clerk/nextjs'
-import { useQuery } from '@tanstack/react-query'
-import { Group, MessageCircle, User2Icon, UserIcon, ArrowRight } from 'lucide-react'
+import { Group, MessageCircle, User2Icon, UserIcon, ArrowRight, X, LogOut, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { motion, AnimatePresence } from 'motion/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 // Helper to get initials
@@ -56,6 +59,9 @@ interface RecentChat {
 
 export default function Dashboard() {
   const { user } = useUser()
+  const router = useRouter()
+  const [isJoinedViewOpen, setIsJoinedViewOpen] = useState(false)
+  const queryClient = useQueryClient()
 
   // 1. Fetch Communities (using the new correct endpoint)
   const { data: communitiesData, isLoading: communitiesLoading } = useQuery<Community[]>({
@@ -84,6 +90,20 @@ export default function Dashboard() {
       const res = await client.api.dashboard.recent.$get()
       if (!res.ok) throw new Error('Failed to fetch recent chats')
       return res.json() as unknown as Promise<RecentChat[]>
+    }
+  })
+
+  const leaveMutation = useMutation({
+    mutationFn: async (communityId: string) => {
+      const res = await (client.api.communities as any)[':id'].leave.$post({
+        param: { id: communityId }
+      })
+      if (!res.ok) throw new Error('Failed to leave community')
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-communities'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
     }
   })
 
@@ -120,7 +140,10 @@ export default function Dashboard() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:border-primary/50 transition-all hover:shadow-sm">
+        <Card
+          className="hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer active:scale-[0.98]"
+          onClick={() => setIsJoinedViewOpen(true)}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">Joined Communities</CardTitle>
             <Group className="h-4 w-4 text-primary" />
@@ -182,7 +205,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-4">
                 {recentChats && recentChats.length > 0 ? (
-                  recentChats.map((chat) => (
+                  recentChats.map((chat: RecentChat) => (
                     <Link href={`/chat/${chat.matchId}`} key={chat.matchId} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={chat.otherUser.imageUrl || ''} />
@@ -239,7 +262,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {communitiesData?.map(c => (
+                {communitiesData?.map((c: Community) => (
                   <Link href={`/communities/${c.id}`} key={c.id}>
                     <div className="group flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
                       <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center overflow-hidden shrink-0">
@@ -270,6 +293,97 @@ export default function Dashboard() {
         </div>
 
       </div>
+
+      {/* Joined Communities Modal */}
+      <AnimatePresence>
+        {isJoinedViewOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsJoinedViewOpen(false)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl bg-card border rounded-3xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[80vh]"
+            >
+              <div className="p-6 sm:p-8 border-b flex justify-between items-center bg-muted/20">
+                <div>
+                  <h2 className="text-2xl font-bold">Your Communities</h2>
+                  <p className="text-muted-foreground text-sm">Managed your joined learning spaces.</p>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setIsJoinedViewOpen(false)} className="rounded-full">
+                  <X className="size-5" />
+                </Button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {communitiesData && communitiesData.length > 0 ? (
+                  communitiesData.map((com: Community) => (
+                    <div key={com.id} className="group flex items-center justify-between p-4 rounded-2xl border bg-card hover:border-primary/50 transition-all shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="size-12 rounded-xl bg-muted overflow-hidden shrink-0">
+                          {com.imageUrl ? (
+                            <img src={com.imageUrl} alt={com.name} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-muted-foreground/40">
+                              <Group className="size-6" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h4 className="font-bold">{com.name}</h4>
+                          <p className="text-xs text-muted-foreground line-clamp-1">{com.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/communities/${com.id}`}>
+                          <Button variant="outline" size="sm" className="rounded-full px-4 border-2">
+                            View
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="rounded-full px-4 text-destructive hover:bg-destructive/10 hover:text-destructive group/leave"
+                          onClick={() => {
+                            if (confirm(`Leave ${com.name}?`)) {
+                              leaveMutation.mutate(com.id)
+                            }
+                          }}
+                          disabled={leaveMutation.isPending}
+                        >
+                          {leaveMutation.isPending ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <>
+                              <LogOut className="sx-4 mr-2" />
+                              Leave
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <p>You haven't joined any communities yet.</p>
+                    <Button variant="link" onClick={() => {
+                      setIsJoinedViewOpen(false)
+                      router.push('/communities')
+                    }}>Find communities &rarr;</Button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
+

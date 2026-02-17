@@ -2,7 +2,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
 import Headerwraper from '@/components/layout/header-wrapper'
-import Footer from '@/components/layout/footer'
+import FooterWrapper from '@/components/layout/footer-wrapper'
 import BackgroundGradient from '@/components/landing/background-gradient'
 import { QueryProvider } from '@/components/provider'
 
@@ -35,7 +35,7 @@ export default function RootLayout({
                 <main className="flex-1">
                   {children}
                 </main>
-                <Footer />
+                <FooterWrapper />
               </div>
             </BackgroundGradient>
           </QueryProvider>

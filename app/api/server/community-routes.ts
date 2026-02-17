@@ -11,7 +11,11 @@ type Variables = {
 const communitiesApp = new Hono<{ Variables: Variables }>()
   .get('/all', async c => {
     const allCommu = await Community.find()
-    return c.json(allCommu)
+    const mapped = allCommu.map((com: any) => ({
+      ...com.toObject(),
+      id: com._id.toString()
+    }))
+    return c.json(mapped)
   })
   .post('/', async c => {
     const userId = c.get('userId')
@@ -44,7 +48,14 @@ const communitiesApp = new Hono<{ Variables: Variables }>()
   .get('/', async c => {
     const clerkID = c.get('userId')
     const memberships = await CommunityMember.find({ userId: clerkID }).populate('communityId')
-    const userCommunityes = memberships.map(m => m.communityId)
+    const userCommunityes = memberships.map((m: any) => {
+      const com = m.communityId;
+      if (!com) return null;
+      return {
+        ...com.toObject(),
+        id: com._id.toString()
+      }
+    }).filter(Boolean)
 
     return c.json(userCommunityes)
   })
@@ -60,7 +71,10 @@ const communityDetailApp = new Hono<{ Variables: Variables }>()
     if (!community) {
       return c.json({ error: 'Community not found' }, 404)
     }
-    return c.json(community)
+    return c.json({
+      ...community.toObject(),
+      id: community._id.toString()
+    })
   })
   .post('/join', async c => {
     const communityId = c.req.param('id')
@@ -83,6 +97,16 @@ const communityDetailApp = new Hono<{ Variables: Variables }>()
     )
 
     return c.json({ message: 'Joined successfully' })
+  })
+  .post('/leave', async c => {
+    const communityId = c.req.param('id')
+    const userId = c.get('userId')
+
+    if (!communityId || !userId) return c.json({ error: 'Invalid request' }, 400)
+
+    await CommunityMember.deleteOne({ userId, communityId })
+
+    return c.json({ message: 'Left community successfully' })
   })
   .get('/membership', async c => {
     const communityId = c.req.param('id')
@@ -123,7 +147,8 @@ const communityDetailApp = new Hono<{ Variables: Variables }>()
     const communityId = c.req.param('id')
     if (!communityId) return c.json({ error: 'Community ID missing' }, 400)
 
-    const memberships = await CommunityMember.find({ communityId }).populate('userId')
+    const userId = c.get('userId')
+    const memberships = await CommunityMember.find({ communityId, userId: { $ne: userId } }).populate('userId')
     const members = memberships.map(m => {
       const user = m.userId as any;
       return {

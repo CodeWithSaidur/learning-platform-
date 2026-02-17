@@ -95,9 +95,14 @@ const chatApp = new Hono<{ Variables: Variables }>()
 
         // Trigger Pusher event
         try {
-            await pusherServer.trigger(`chat-${conversation._id}`, 'new-message', newMessage)
+            await pusherServer.trigger(
+                `chat-${conversation._id.toString()}`,
+                'new-message',
+                newMessage.toJSON()
+            )
+            console.log(`[Pusher] Triggered new-message on channel: chat-${conversation._id.toString()}`)
         } catch (e) {
-            console.error('Pusher trigger failed:', e)
+            console.error('[Pusher] Trigger failed:', e)
         }
 
         return c.json(newMessage)

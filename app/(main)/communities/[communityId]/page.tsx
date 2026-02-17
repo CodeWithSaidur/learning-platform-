@@ -187,37 +187,37 @@ export default function CommunityDetailsPage() {
     if (!community) return <div className="p-8 text-center">Community not found</div>
 
     return (
-        <div className="page-wrapper p-8 max-w-5xl mx-auto space-y-12">
+        <div className="page-wrapper p-4 sm:p-8 max-w-5xl mx-auto space-y-8 sm:space-y-12">
             {/* Banner / Header */}
-            <div className="relative overflow-hidden bg-card border rounded-[2.5rem] p-8 md:p-12 shadow-sm">
+            <div className="relative overflow-hidden bg-card border rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-8 md:p-12 shadow-sm">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full -ml-32 -mb-32 blur-3xl" />
 
-                <div className="relative flex flex-col md:flex-row gap-8 items-start">
-                    <div className="h-32 w-32 bg-muted rounded-3xl flex items-center justify-center shrink-0 shadow-inner overflow-hidden border-4 border-background">
+                <div className="relative flex flex-col md:flex-row gap-6 sm:gap-8 items-center md:items-start text-center md:text-left">
+                    <div className="h-24 w-24 sm:h-32 sm:w-32 bg-muted rounded-2xl sm:rounded-3xl flex items-center justify-center shrink-0 shadow-inner overflow-hidden border-2 sm:border-4 border-background">
                         {community.imageUrl ? (
                             <img src={community.imageUrl} alt={community.name} className="h-full w-full object-cover" />
                         ) : (
                             <Group className="h-12 w-12 text-muted-foreground/40" />
                         )}
                     </div>
-                    <div className="flex-1 space-y-4">
+                    <div className="flex-1 space-y-4 w-full">
                         <div>
-                            <h1 className="text-4xl font-black tracking-tight mb-2">{community.name}</h1>
-                            <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl">{community.description}</p>
+                            <h1 className="text-2xl sm:text-4xl font-black tracking-tight mb-2">{community.name}</h1>
+                            <p className="text-muted-foreground text-sm sm:text-lg leading-relaxed max-w-2xl mx-auto md:mx-0">{community.description}</p>
                         </div>
-                        <div className="flex flex-wrap gap-3 pt-2">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-2 items-center justify-center md:justify-start">
                             {isMember ? (
-                                <Badge variant="secondary" className="h-10 px-4 rounded-full text-sm font-medium">Member</Badge>
+                                <Badge variant="secondary" className="h-10 px-4 rounded-full text-sm font-medium w-full sm:w-auto justify-center">Member</Badge>
                             ) : (
-                                <Button size="lg" className="rounded-full h-12 px-8 shadow-lg shadow-primary/20" onClick={() => joinMutation.mutate()} disabled={joinMutation.isPending}>
+                                <Button size="lg" className="rounded-full h-11 sm:h-12 px-8 shadow-lg shadow-primary/20 w-full sm:w-auto" onClick={() => joinMutation.mutate()} disabled={joinMutation.isPending}>
                                     {joinMutation.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Plus className="mr-2 size-4" />}
                                     Join Community
                                 </Button>
                             )}
-                            <Button size="lg" variant="outline" className="rounded-full h-12 px-8 border-2" onClick={() => matchMutation.mutate()} disabled={matchMutation.isPending || !isMember}>
+                            <Button size="lg" variant="outline" className="rounded-full h-11 sm:h-12 px-8 border-2 w-full sm:w-auto" onClick={() => matchMutation.mutate()} disabled={matchMutation.isPending || !isMember}>
                                 {matchMutation.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Sparkles className="mr-2 size-4 text-primary" />}
-                                Find Study Partners
+                                Find Partners
                             </Button>
                         </div>
                     </div>

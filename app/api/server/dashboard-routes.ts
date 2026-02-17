@@ -11,7 +11,11 @@ const dashboardApp = new Hono<{ Variables: Variables }>()
     .get('/me', async c => {
         const userId = c.get('userId')
         const user = await User.findById(userId)
-        return c.json(user)
+        if (!user) return c.json({ error: 'User not found' }, 404)
+        return c.json({
+            ...user.toObject(),
+            id: user._id.toString()
+        })
     })
 
     // Get User Stats

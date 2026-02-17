@@ -36,7 +36,7 @@ app.onError((err, c) => {
 app.use('/*', async (c, next) => {
   // Check if the current route is public
   const internalPath = c.req.path
-  const publicPaths = ['/communities/all', '/admin/login']
+  const publicPaths = ['/api/communities/all', '/api/admin/login']
 
   if (publicPaths.includes(internalPath)) {
     return next()

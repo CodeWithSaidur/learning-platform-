@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Send } from 'lucide-react'
+import { Send, ArrowLeft } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { type ClassValue, clsx } from "clsx"
@@ -98,7 +98,7 @@ export default function ChatWindowPage() {
     useEffect(() => {
         if (!data?.conversation.id) return
 
-        const channelName = `chat-${data.conversation.id}`
+        const channelName = `chat-${data.conversation.id || (data.conversation as any)._id}`
         const channel = pusherClient.subscribe(channelName)
 
         channel.bind('new-message', (newMessage: Message) => {
@@ -156,8 +156,18 @@ export default function ChatWindowPage() {
         <div className="flex flex-row h-full w-full overflow-hidden">
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Header */}
-                <div className="h-16 border-b px-6 flex items-center justify-between bg-background/50 backdrop-blur-sm shrink-0">
-                    <h2 className="font-semibold truncate">Chat</h2>
+                <div className="min-h-16 h-auto border-b px-4 sm:px-6 py-2 flex items-center justify-between bg-background/50 backdrop-blur-sm shrink-0 flex-wrap gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="md:hidden shrink-0"
+                            onClick={() => router.push('/chat')}
+                        >
+                            <ArrowLeft className="size-5" />
+                        </Button>
+                        <h2 className="font-bold truncate text-base sm:text-lg">Chat</h2>
+                    </div>
                     <Button
                         variant="ghost"
                         size="sm"
@@ -174,7 +184,7 @@ export default function ChatWindowPage() {
                         ) : (
                             <Trash2 className="size-4" />
                         )}
-                        Delete Chat
+                        <span className="hidden min-[400px]:inline">Delete Chat</span>
                     </Button>
                 </div>
 

@@ -30,10 +30,15 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         refetchInterval: 10000
     })
 
+    const isChatting = !!params?.matchId
+
     return (
-        <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+        <div className="flex h-[calc(100dvh-64px)] overflow-hidden">
             {/* Sidebar: Conversation List */}
-            <div className="w-80 border-r bg-muted/20 flex flex-col shrink-0">
+            <div className={cn(
+                "w-full md:w-80 border-r bg-muted/20 flex flex-col shrink-0",
+                isChatting ? "hidden md:flex" : "flex"
+            )}>
                 <div className="p-4 border-b font-semibold flex items-center gap-2">
                     <MessageCircle className="size-5" />
                     Messages
@@ -82,7 +87,10 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             </div>
 
             {/* Main Content (Chat Window or Empty State) */}
-            <div className="flex-1 flex flex-col min-w-0 bg-background">
+            <div className={cn(
+                "flex-1 flex flex-col min-w-0 bg-background",
+                !isChatting ? "hidden md:flex" : "flex"
+            )}>
                 {children}
             </div>
         </div>

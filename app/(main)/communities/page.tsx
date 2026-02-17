@@ -84,14 +84,14 @@ export default function CommunitiesPage() {
     )
 
     return (
-        <div className="page-wrapper p-8 max-w-5xl mx-auto space-y-8 min-h-screen">
+        <div className="page-wrapper p-4 sm:p-8 max-w-5xl mx-auto space-y-6 sm:space-y-8 min-h-screen">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                         Explore Communities
                     </h1>
-                    <p className="text-muted-foreground mt-1 text-lg">
+                    <p className="text-muted-foreground mt-1 text-base sm:text-lg">
                         Connect with like-minded learners around the globe.
                     </p>
                 </div>
@@ -137,7 +137,7 @@ export default function CommunitiesPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 whileHover={{ y: -5 }}
-                                className="group relative h-full flex flex-col bg-card border rounded-3xl overflow-hidden hover:border-primary/50 transition-colors shadow-sm hover:shadow-xl"
+                                className="group relative h-full flex flex-col bg-card border rounded-2xl sm:rounded-3xl overflow-hidden hover:border-primary/50 transition-colors shadow-sm hover:shadow-xl"
                             >
                                 <div className="h-40 w-full bg-secondary/30 relative overflow-hidden">
                                     {c.imageUrl ? (
